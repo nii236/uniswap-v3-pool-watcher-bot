@@ -16,10 +16,12 @@ type EthCallResponse struct {
 	Result  string `json:"result"`
 }
 
-// updatedMsg := fmt.Sprintf("Token 0: %s Token 1: %s", unclaimed_fees_token_0, unclaimed_fees_token_1)
-func HandleStatusCmd() string {
+func HandleStatusCmd(geth_url string) (string) {
 	final_result := ""
 	for k, v := range RegisteredPools {
+		token0_name := strings.Split(k, "/")[0]
+		token1_name := strings.Split(k, "/")[1]
+		errorOutputStr := fmt.Sprintf("%s/%s: Unable to fetch\n", token0_name, token1_name)
 		var jsonStr = fmt.Sprintf(`
 			{
 				"jsonrpc": "2.0",
@@ -36,11 +38,13 @@ func HandleStatusCmd() string {
 			}
 		`, v.from, v.to, v.data)
 		requestBody := bytes.NewBuffer([]byte(jsonStr))
-		API_URL := "https://mainnet.infura.io/v3/099fc58e0de9451d80b18d7c74caa7c1"
+		API_URL := geth_url
 		client := &http.Client{}
 		req, err := http.NewRequest("POST", API_URL, requestBody)
 		if err != nil {
-			log.Fatalln(err)
+			log.Printf("Error %v", err)
+			final_result += errorOutputStr
+			continue;
 		}
 		req.Header.Add("Content-Type", "application/json")
 		req.Header.Add("origin", "https://app.uniswap.org/")
@@ -48,26 +52,43 @@ func HandleStatusCmd() string {
 		resp, err := client.Do(req)
 		// Handle Error
 		if err != nil {
-			log.Fatalf("An Error Occured %v", err)
+			log.Printf("Error %v", err)
+			final_result += errorOutputStr
+			continue;
 		}
 		defer resp.Body.Close()
 		//Read the response body
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalln(err)
+			log.Printf("Error %v", err)
+			final_result += errorOutputStr
+			continue;
 		}
 		var output EthCallResponse
-		json.Unmarshal(body, &output)
+		err = json.Unmarshal(body, &output)
+		if err != nil {
+			log.Printf("Error %v", err)
+			final_result += errorOutputStr
+			continue;
+		}
 
 		//get token0 unclaimed fees
-		token0_unclaimed_fees := CalcUnclaimedFees(0, output.Result[2:66])
+		token0_unclaimed_fees, err := CalcUnclaimedFees(0, output.Result[2:66])
+		if err != nil {
+			log.Printf("Error %v", err)
+			final_result += errorOutputStr
+			continue;
+		}
 
 		// //get token1 unclaimed fees
-		token1_unclaimed_fees := CalcUnclaimedFees(1, output.Result[66:])
+		token1_unclaimed_fees, err := CalcUnclaimedFees(1, output.Result[66:])
+		if err != nil {
+			log.Printf("Error %v", err)
+			final_result += errorOutputStr
+			continue;
+		}
 
-		token0_name := strings.Split(k, "/")[0]
-		token1_name := strings.Split(k, "/")[1]
-		final_result += fmt.Sprintf("%s: %s %s: %s", token0_name, token0_unclaimed_fees, token1_name, token1_unclaimed_fees)
+		final_result += fmt.Sprintf("%s: %s %s: %s \n", token0_name, token0_unclaimed_fees, token1_name, token1_unclaimed_fees)
 	}
 	return final_result
 }
