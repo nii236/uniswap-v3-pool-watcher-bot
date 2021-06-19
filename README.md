@@ -15,4 +15,6 @@ The bot is configured at start-up to watch specific pools via environment variab
 
 ### How to run
 - cd to the root of the repo
-- `BOT_KEY=$YOUR_BOT_KEY go run main.go`. Voila! Your telegram bot is live!
+- Build the application: `go build main.go`
+- Run the application: `./main -k {BOT_KEY} --t 60 -u https://mainnet.infura.io/v3/099fc58e0de9451d80b18d7c74caa7c1`
+- Voila! Your telegram bot is live!
