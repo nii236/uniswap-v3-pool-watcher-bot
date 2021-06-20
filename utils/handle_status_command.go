@@ -88,7 +88,7 @@ func HandleStatusCmd(geth_url string) (string) {
 			continue;
 		}
 
-		final_result += fmt.Sprintf("%s: %s %s: %s \n", token0_name, token0_unclaimed_fees, token1_name, token1_unclaimed_fees)
+		final_result += fmt.Sprintf("%s: %s %s: %s\n", token0_name, token0_unclaimed_fees, token1_name, token1_unclaimed_fees)
 	}
 	return final_result
 }
