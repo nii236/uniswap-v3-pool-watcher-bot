@@ -53,7 +53,7 @@ func main() {
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
-		u.Timeout, err = strconv.Atoi(timeout)
+	u.Timeout, err = strconv.Atoi(timeout)
 	if err != nil {
 		log.Println("Error converting timeout: ", err)
 		return
@@ -64,7 +64,7 @@ func main() {
 		log.Println("Error getting channel updates:", err)
 		return
 	}
-	
+
 	for update := range updates {
 		if update.Message == nil || update.Message.Text != "/status" { // ignore any non-Message Updates
 			continue
