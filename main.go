@@ -53,7 +53,11 @@ func main() {
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
-	u.Timeout, _ = strconv.Atoi(timeout)
+		u.Timeout, err = strconv.Atoi(timeout)
+	if err != nil {
+		log.Println("Error converting timeout: ", err)
+		return
+	}
 
 	updates, err := bot.GetUpdatesChan(u)
 	if err != nil {
