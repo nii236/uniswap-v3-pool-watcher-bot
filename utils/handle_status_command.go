@@ -16,8 +16,10 @@ type EthCallResponse struct {
 	Result  string `json:"result"`
 }
 
-func HandleStatusCmd(geth_url string) (string) {
+func HandleStatusCmd(geth_url string) (string, []string) {
 	final_result := ""
+	total_unclaimed_fees := make([]string, 0)
+
 	for k, v := range RegisteredPools {
 		token0_name := strings.Split(k, "/")[0]
 		token1_name := strings.Split(k, "/")[1]
@@ -44,7 +46,7 @@ func HandleStatusCmd(geth_url string) (string) {
 		if err != nil {
 			log.Printf("Error %v", err)
 			final_result += errorOutputStr
-			continue;
+			continue
 		}
 		req.Header.Add("Content-Type", "application/json")
 		req.Header.Add("origin", "https://app.uniswap.org/")
@@ -54,7 +56,7 @@ func HandleStatusCmd(geth_url string) (string) {
 		if err != nil {
 			log.Printf("Error %v", err)
 			final_result += errorOutputStr
-			continue;
+			continue
 		}
 		defer resp.Body.Close()
 		//Read the response body
@@ -62,14 +64,14 @@ func HandleStatusCmd(geth_url string) (string) {
 		if err != nil {
 			log.Printf("Error %v", err)
 			final_result += errorOutputStr
-			continue;
+			continue
 		}
 		var output EthCallResponse
 		err = json.Unmarshal(body, &output)
 		if err != nil {
 			log.Printf("Error %v", err)
 			final_result += errorOutputStr
-			continue;
+			continue
 		}
 
 		//get token0 unclaimed fees
@@ -77,7 +79,7 @@ func HandleStatusCmd(geth_url string) (string) {
 		if err != nil {
 			log.Printf("Error %v", err)
 			final_result += errorOutputStr
-			continue;
+			continue
 		}
 
 		// //get token1 unclaimed fees
@@ -85,10 +87,34 @@ func HandleStatusCmd(geth_url string) (string) {
 		if err != nil {
 			log.Printf("Error %v", err)
 			final_result += errorOutputStr
-			continue;
+			continue
 		}
 
-		final_result += fmt.Sprintf("%s: %s %s: %s\n", token0_name, token0_unclaimed_fees, token1_name, token1_unclaimed_fees)
+		// add above values to get total unclaimed fees
+		total_unclaimed_fees = append(
+			total_unclaimed_fees,
+			fmt.Sprintf(
+				"%s/%s: %s",
+				token0_name,
+				token1_name,
+				CalcTotalUnclaimedFees(
+					token0_unclaimed_fees,
+					token1_unclaimed_fees,
+					token0_name,
+					token1_name,
+				),
+			),
+		)
+
+		// construct & append final result to send to telegram bot
+		final_result += fmt.Sprintf(
+			"%s: %s %s: %s\n",
+			token0_name,
+			token0_unclaimed_fees,
+			token1_name,
+			token1_unclaimed_fees,
+		)
 	}
-	return final_result
+
+	return final_result, total_unclaimed_fees
 }
