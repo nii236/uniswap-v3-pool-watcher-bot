@@ -27,7 +27,6 @@ func FetchTokenPrice(slug string) (float64, error) {
 		log.Println(err)
 		return 0, err
 	}
-	fmt.Println(string(body))
 	output := make(map[string]map[string]float32)
 	err = json.Unmarshal(body, &output)
 	if err != nil {

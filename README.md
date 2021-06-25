@@ -2,7 +2,8 @@
 A Telegram Bot that reports how many fees are unclaimed from a Uniswap V3 pool
 
 ### Description
-The bot is configured at start-up to watch specific pools via environment variables and cli flags (just a list of integers).
+The bot is configured at start-up to watch specific pools via environment variables and cli flags (just a list of integers). Only whitelisted accounts are allowed to talk to the bot.
+The bot also sends a message to its users when the unclaimed fees in some pools cross a threshold amount (say 1000$).
 
 ### Interaction
 `/status`

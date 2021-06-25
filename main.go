@@ -48,17 +48,14 @@ func main() {
 		return
 	}
 
-	// Run a cron job to constantly check if threshold is crossed
-	err = utils.RunCronJob(bot, geth_url)
+	// Run a cron job to constantly check if threshold $1000 is crossed
+	err = utils.RunCronJob(bot, geth_url, 1000.0)
 	if err != nil {
 		log.Println("Couldn't run cron job")
 		return
 	}
-	// go utils.SendMessageOnThresholdBreach(bot, geth_url, int64(847297749373964))
 	// Uncomment below line for complete debug output
 	// bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout, err = strconv.Atoi(timeout)
@@ -78,7 +75,7 @@ func main() {
 			!utils.IsWhitelistedAccount(update.Message.From.ID) { // allow only whitelisted accounts to commmunicate with bot
 			continue
 		}
-		updated_msg, _ := utils.HandleStatusCmd(geth_url)
+		updated_msg := utils.HandleStatusCmd(geth_url)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, updated_msg)
 		msg.ReplyToMessageID = update.Message.MessageID
 
