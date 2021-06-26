@@ -12,6 +12,7 @@ import (
 
 func main() {
 	var bot_key, geth_url, timeout string
+	var threshold float64
 	app := &cli.App{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -35,9 +36,23 @@ func main() {
 				Destination: &geth_url,
 				Usage:       "Geth Url for the telegram bot",
 			},
+			&cli.IntSliceFlag{
+				Name:    "accountIDs",
+				Aliases: []string{"aid"},
+				Usage:   "Account Ids subscribed to the telegram bot",
+			},
+			&cli.Float64Flag{
+				Name:        "threshold",
+				Aliases:     []string{"th"},
+				Destination: &threshold,
+				Usage:       "Threshold for unclaimed fees in pool",
+			},
+		},
+		Action: func(c *cli.Context) error {
+			utils.WhitelistTelegramAccountIDs = c.IntSlice("accountIDs")
+			return nil
 		},
 	}
-
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +64,7 @@ func main() {
 	}
 
 	// Run a cron job to constantly check if threshold $1000 is crossed
-	err = utils.RunCronJob(bot, geth_url, 1000.0)
+	err = utils.RunStartScheduler(bot, geth_url, threshold)
 	if err != nil {
 		log.Println("Couldn't run cron job")
 		return
@@ -75,11 +90,15 @@ func main() {
 			!utils.IsWhitelistedAccount(update.Message.From.ID) { // allow only whitelisted accounts to commmunicate with bot
 			continue
 		}
-		updated_msg := utils.HandleStatusCmd(geth_url)
+		updated_msg, err := utils.HandleStatusCmd(geth_url)
+		if err != nil {
+			log.Printf("Error %v", err)
+			continue
+		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, updated_msg)
 		msg.ReplyToMessageID = update.Message.MessageID
 
-		_, err := bot.Send(msg)
+		_, err = bot.Send(msg)
 		if err != nil {
 			log.Println("Bot send error: ", err)
 		}

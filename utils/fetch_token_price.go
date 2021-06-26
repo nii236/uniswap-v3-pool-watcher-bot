@@ -22,11 +22,11 @@ func FetchTokenPrice(slug string) (float64, error) {
 		return 0, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
 	if err != nil {
 		log.Println(err)
 		return 0, err
 	}
+	defer resp.Body.Close()
 	output := make(map[string]map[string]float32)
 	err = json.Unmarshal(body, &output)
 	if err != nil {

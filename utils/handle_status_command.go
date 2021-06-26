@@ -16,6 +16,8 @@ type EthCallResponse struct {
 	Result  string `json:"result"`
 }
 
+// Calls the Uniswap V3 API and returns 130 hex chars length output string
+// This string is later processed to get the individual tokens unclaimed fees percentage
 func UniswapAPICall(from string, to string, data string, geth_url string) (string, error) {
 	var jsonStr = fmt.Sprintf(`
 		{
@@ -64,33 +66,28 @@ func UniswapAPICall(from string, to string, data string, geth_url string) (strin
 	return output.Result, nil
 }
 
-func HandleStatusCmd(geth_url string) string {
+// Returns the final message the bot sends when it receives /status command
+func HandleStatusCmd(geth_url string) (string, error) {
 	final_result := ""
 
 	for k, v := range RegisteredPools {
 		token0_name := strings.Split(k, "/")[0]
 		token1_name := strings.Split(k, "/")[1]
-		errorOutputStr := fmt.Sprintf("%s/%s: Unable to fetch\n", token0_name, token1_name)
 		uniswapResp, err := UniswapAPICall(v.from, v.to, v.data, geth_url)
 		if err != nil {
-			log.Printf("Error %v", err)
-			final_result += errorOutputStr
-			continue
+			return "", err
 		}
 		//get token0 unclaimed fees
 		token0_unclaimed_fees, err := CalcUnclaimedFees(0, uniswapResp[2:66])
 		if err != nil {
-			log.Printf("Error %v", err)
-			final_result += errorOutputStr
-			continue
+			return "", err
 		}
 
 		//get token1 unclaimed fees
 		token1_unclaimed_fees, err := CalcUnclaimedFees(1, uniswapResp[66:])
 		if err != nil {
-			log.Printf("Error %v", err)
-			final_result += errorOutputStr
-			continue
+
+			return "", err
 		}
 
 		// construct & append final result to send to telegram bot
@@ -103,5 +100,5 @@ func HandleStatusCmd(geth_url string) string {
 		)
 	}
 
-	return final_result
+	return final_result, nil
 }

@@ -7,12 +7,8 @@ import (
 
 func TestFetchTokenPrice(t *testing.T) {
 	slug := "ethereum"
-	expected := 2.887
-	calculated, err := utils.FetchTokenPrice(slug)
+	_, err := utils.FetchTokenPrice(slug)
 	if err != nil {
 		t.Error(err)
-	}
-	if expected != calculated {
-		t.Errorf("Expected %f but got %f", expected, calculated)
 	}
 }
