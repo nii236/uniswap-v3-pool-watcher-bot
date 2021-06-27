@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"math/big"
 	"strconv"
 )
@@ -28,12 +27,10 @@ func CalcTotalUnclaimedFees(
 	// Fetch current prices of each token
 	token0PriceInDollars, err := FetchTokenPrice(tokenSymbolToName[token0_name])
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 	token1PriceInDollars, err := FetchTokenPrice(tokenSymbolToName[token1_name])
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 
@@ -41,7 +38,6 @@ func CalcTotalUnclaimedFees(
 	token0FeesInDollars := new(big.Float)
 	token0UnclaimedFees, err := strconv.ParseFloat(token0_unclaimed_fees, 64)
 	if err != nil {
-		log.Println("Error converting string to float", err)
 		return "", err
 	}
 	token0FeesInDollars.Mul(big.NewFloat(token0PriceInDollars), big.NewFloat(token0UnclaimedFees))
@@ -49,7 +45,6 @@ func CalcTotalUnclaimedFees(
 	token1FeesInDollars := new(big.Float)
 	token1UnclaimedFees, err := strconv.ParseFloat(token1_unclaimed_fees, 64)
 	if err != nil {
-		log.Println("Error converting string to float", err)
 		return "", err
 	}
 	token1FeesInDollars.Mul(big.NewFloat(token1PriceInDollars), big.NewFloat(token1UnclaimedFees))

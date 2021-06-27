@@ -48,6 +48,10 @@ func FilterThresholdCrossingPools(gethUrl string, threshold float64) []string {
 
 		// Now get total unclaimed fees in dollars
 		total_unclaimed_fees, err := CalcTotalUnclaimedFees(token0_unclaimed_fees, token1_unclaimed_fees, token0_name, token1_name)
+		if err != nil {
+			log.Printf("Error %v", err)
+			continue
+		}
 		totalFeesInFloat := new(big.Float)
 		totalFeesInFloat.SetString(total_unclaimed_fees)
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -91,9 +92,9 @@ func main() {
 			continue
 		}
 		updated_msg, err := utils.HandleStatusCmd(geth_url)
-		if err != nil {
+		if err != nil {	// if err, send the error msg to the bot
 			log.Printf("Error %v", err)
-			continue
+			updated_msg = fmt.Sprintf("Error %v", err)
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, updated_msg)
 		msg.ReplyToMessageID = update.Message.MessageID

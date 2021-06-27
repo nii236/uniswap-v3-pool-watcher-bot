@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -14,23 +13,20 @@ func FetchTokenPrice(slug string) (float64, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", API_URL, nil)
 	if err != nil {
-		log.Printf("Error %v", err)
+		return 0, err
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
 		return 0, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err)
 		return 0, err
 	}
 	defer resp.Body.Close()
 	output := make(map[string]map[string]float32)
 	err = json.Unmarshal(body, &output)
 	if err != nil {
-		log.Printf("Error %v", err)
 		return 0, nil
 	}
 	priceInUSD := output[slug]["usd"]

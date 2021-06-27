@@ -10,7 +10,7 @@ The bot also sends a message to its users when the unclaimed fees in some pools 
 - Prints a list of registered pools and how much $ is claimable
 
 ### Future additions
-- In `utils/registered_pools.go`, add parameters for new pools for which the telegram bot is configured to watch
+- In `utils/registered_pools.go`, add parameters for new pools for which the telegram bot is configured to watch.
 - <img src="usdc-dai-1.jpeg">
 - The above image shows the easiest way to get the parameter values
     - Click on the network tab on chrome
